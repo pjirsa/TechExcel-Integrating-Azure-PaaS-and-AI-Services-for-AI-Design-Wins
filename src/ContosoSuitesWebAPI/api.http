@@ -1,4 +1,1 @@
-POST http://localhost:5292/Chat
-Content-Type: multipart/form-data
-
-message="Which bookings do not currently have hotel rooms associated with them?"
+curl -d 'message="Which bookings do not currently have hotel rooms associated with them?"' http://localhost:5292/Chat
