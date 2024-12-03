@@ -7,8 +7,9 @@ namespace ContosoSuitesWebAPI.Services;
 /// <summary>
 /// The database service for querying the Contoso Suites database.
 /// </summary>
-public class DatabaseService : IDatabaseService
+public class DatabaseService(string connectionString) : IDatabaseService
 {
+    
     /// <summary>
     /// Get all hotels from the database.
     /// </summary>
@@ -16,7 +17,7 @@ public class DatabaseService : IDatabaseService
     {
         var sql = "SELECT HotelID, HotelName, City, Country FROM dbo.Hotel";
         using var conn = new SqlConnection(
-            connectionString: Environment.GetEnvironmentVariable("SQLAZURECONNSTR_ContosoSuites")!
+            connectionString: connectionString!
         );
         conn.Open();
         using var cmd = new SqlCommand(sql, conn);
