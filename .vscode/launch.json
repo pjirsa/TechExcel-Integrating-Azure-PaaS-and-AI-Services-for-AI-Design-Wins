@@ -12,7 +12,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build WebAPI", 
-      "program": "${workspaceFolder}/src/ContosoSuitesWebAPI/bin/Debug/net8.0/ContosoSuitesWebAPI.exe",
+      "program": "${workspaceFolder}/src/ContosoSuitesWebAPI/bin/Debug/net8.0/ContosoSuitesWebAPI",
       "args": [],
       "cwd": "${workspaceFolder}/src/ContosoSuitesWebAPI",       
       "console": "internalConsole",
