@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Azure.Core;
 
 
 
@@ -46,7 +47,6 @@ builder.Services.AddSingleton<Kernel>((_) =>
 builder.Services.AddSingleton<IDatabaseService, DatabaseService>((_) => 
 {
     var connectionString = builder.Configuration.GetConnectionString("ContosoSuites");
-    //builder.Configuration["SQLAZURECONNSTR_ContosoSuites"];
     return new DatabaseService(connectionString!);
 });
 builder.Services.AddSingleton<IVectorizationService, VectorizationService>();
@@ -55,8 +55,10 @@ builder.Services.AddSingleton<MaintenanceCopilot, MaintenanceCopilot>();
 // Create a single instance of the CosmosClient to be shared across the application.
 builder.Services.AddSingleton<CosmosClient>((_) =>
 {
+    TokenCredential tokenCredential = new DefaultAzureCredential();
     CosmosClient client = new(
-        connectionString: builder.Configuration["CosmosDB:ConnectionString"]!
+        accountEndpoint: builder.Configuration["CosmosDB:AccountEndpoint"]!,
+        tokenCredential: tokenCredential
     );
     return client;
 });

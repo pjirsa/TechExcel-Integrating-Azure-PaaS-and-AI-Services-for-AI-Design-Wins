@@ -1,1 +1,5 @@
 curl -d 'message="Which bookings do not currently have hotel rooms associated with them?"' http://localhost:5292/Chat
+
+###
+
+GET http://localhost:5292/Hotels
