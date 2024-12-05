@@ -55,7 +55,9 @@ builder.Services.AddSingleton<MaintenanceCopilot, MaintenanceCopilot>();
 // Create a single instance of the CosmosClient to be shared across the application.
 builder.Services.AddSingleton<CosmosClient>((_) =>
 {
-    TokenCredential tokenCredential = new DefaultAzureCredential();
+    TokenCredential tokenCredential = new DefaultAzureCredential(
+        new DefaultAzureCredentialOptions { TenantId = builder.Configuration["AZURE_TENANT_ID"] }
+    );
     CosmosClient client = new(
         accountEndpoint: builder.Configuration["CosmosDB:AccountEndpoint"]!,
         tokenCredential: tokenCredential
