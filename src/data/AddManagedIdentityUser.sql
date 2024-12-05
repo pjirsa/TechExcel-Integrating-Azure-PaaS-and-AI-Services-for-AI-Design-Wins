@@ -1,6 +1,3 @@
-USE master;
-CREATE LOGIN TechExcelMI FROM EXTERNAL PROVIDER WITH OBJECT_ID = 'd245b5b8-cabc-479c-8189-ee880f7e9d9e'
-
 USE ContosoSuitesBookings;
 CREATE USER TechExcelMI FROM LOGIN TechExcelMI;
 ALTER ROLE db_datareader ADD MEMBER TechExcelMI;
