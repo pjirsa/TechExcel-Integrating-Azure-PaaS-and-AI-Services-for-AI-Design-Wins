@@ -14,8 +14,6 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Azure.Core;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 var config = new ConfigurationBuilder()
@@ -42,10 +40,25 @@ builder.Services.AddSingleton<Kernel>((_) =>
         deploymentName: builder.Configuration["AzureOpenAI:EmbeddingDeploymentName"]!,
         endpoint: builder.Configuration["AzureOpenAI:Endpoint"]!,
         apiKey: builder.Configuration["AzureOpenAI:ApiKey"]!
-);
+    );
 
     var connStr = builder.Configuration.GetConnectionString("ContosoSuites");
     kernelBuilder.Plugins.AddFromObject(new DatabaseService(connStr!));
+    kernelBuilder.Plugins.AddFromType<MaintenanceRequestPlugin>("MaintenanceCopilot");
+
+    kernelBuilder.Services.AddSingleton<CosmosClient>((_) =>
+    {
+        TokenCredential tokenCredential = new DefaultAzureCredential(
+            new DefaultAzureCredentialOptions { TenantId = builder.Configuration["AZURE_TENANT_ID"] }
+        );
+        CosmosClient client = new(
+            accountEndpoint: builder.Configuration["CosmosDB:AccountEndpoint"]!,
+            tokenCredential: tokenCredential
+        );
+        return client;
+    });
+
+
     return kernelBuilder.Build();
 });
 
@@ -162,7 +175,9 @@ app.MapPost("/VectorSearch", async ([FromBody] float[] queryVector, [FromService
 app.MapPost("/MaintenanceCopilotChat", async ([FromBody]string message, [FromServices] MaintenanceCopilot copilot) =>
 {
     // Exercise 5 Task 2 TODO #10: Insert code to call the Chat function on the MaintenanceCopilot. Don't forget to remove the NotImplementedException.
-    throw new NotImplementedException();
+    var response = await copilot.Chat(message);
+    return response;
+
 })
     .WithName("Copilot")
     .WithOpenApi();
