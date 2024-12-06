@@ -4,6 +4,7 @@ import re
 import uuid
 import streamlit as st
 from scipy.io import wavfile
+from azure.identity import DefaultAzureCredential
 import azure.cognitiveservices.speech as speechsdk
 from azure.ai.textanalytics import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
@@ -349,7 +350,21 @@ def make_azure_openai_embedding_request(text):
     """Create and return a new embedding request. Key assumptions:
     - Azure OpenAI endpoint, key, and deployment name stored in Streamlit secrets."""
 
-    return "This is a placeholder result. Fill in with real embedding."
+    aoai_endpoint = st.secrets["aoai"]["endpoint"]
+    aoai_key = st.secrets["aoai"]["key"]
+    aoai_embedding_deployment_name = st.secrets["aoai"]["embedding_deployment_name"]
+
+    client = openai.AzureOpenAI(
+        api_key=aoai_key,
+        api_version="2024-06-01",
+        azure_endpoint = aoai_endpoint
+    )
+    # Create and return a new embedding request
+    return client.embeddings.create(
+        model=aoai_embedding_deployment_name,
+        input=text
+    )
+
 
 def normalize_text(s):
     """Normalize text for tokenization."""
@@ -370,10 +385,13 @@ def generate_embeddings_for_call_contents(call_contents):
     - Azure OpenAI endpoint, key, and deployment name stored in Streamlit secrets."""
 
     # Normalize the text for tokenization
-    # Call make_azure_openai_embedding_request() with the normalized content
-    # Return the embeddings
+    normalized_content = normalize_text(call_contents)
 
-    return [0, 0, 0]
+    # Call make_azure_openai_embedding_request() with the normalized content
+    response = make_azure_openai_embedding_request(normalized_content)
+
+    return response.data[0].embedding
+
 
 def save_transcript_to_cosmos_db(transcript_item):
     """Save embeddings to Cosmos DB vector store. Key assumptions:
@@ -382,13 +400,19 @@ def save_transcript_to_cosmos_db(transcript_item):
     - Cosmos DB endpoint, key, and database name stored in Streamlit secrets."""
 
     cosmos_endpoint = st.secrets["cosmos"]["endpoint"]
-    cosmos_key = st.secrets["cosmos"]["key"]
+    cosmos_credentials = DefaultAzureCredential()
     cosmos_database_name = st.secrets["cosmos"]["database_name"]
     cosmos_container_name = "CallTranscripts"
 
     # Create a CosmosClient
+    client = CosmosClient(url=cosmos_endpoint, credential=cosmos_credentials)
     # Load the Cosmos database and container
+    database = client.get_database_client(cosmos_database_name)
+    container = database.get_container_client(cosmos_container_name)
+
     # Insert the call transcript
+    container.create_item(body=transcript_item)
+
 
 ####################### HELPER FUNCTIONS FOR MAIN() #######################
 def perform_audio_transcription(uploaded_file):
