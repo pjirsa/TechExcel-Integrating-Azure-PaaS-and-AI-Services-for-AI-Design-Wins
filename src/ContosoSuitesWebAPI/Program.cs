@@ -1,3 +1,4 @@
+#pragma warning disable SKEXP0010
 using Azure.Identity;
 using Microsoft.Azure.Cosmos;
 using ContosoSuitesWebAPI.Agents;
@@ -37,6 +38,12 @@ builder.Services.AddSingleton<Kernel>((_) =>
         endpoint: builder.Configuration["AzureOpenAI:Endpoint"]!,
         apiKey: builder.Configuration["AzureOpenAI:ApiKey"]!
     );
+        kernelBuilder.AddAzureOpenAITextEmbeddingGeneration(
+        deploymentName: builder.Configuration["AzureOpenAI:EmbeddingDeploymentName"]!,
+        endpoint: builder.Configuration["AzureOpenAI:Endpoint"]!,
+        apiKey: builder.Configuration["AzureOpenAI:ApiKey"]!
+);
+
     var connStr = builder.Configuration.GetConnectionString("ContosoSuites");
     kernelBuilder.Plugins.AddFromObject(new DatabaseService(connStr!));
     return kernelBuilder.Build();
@@ -62,16 +69,6 @@ builder.Services.AddSingleton<CosmosClient>((_) =>
         accountEndpoint: builder.Configuration["CosmosDB:AccountEndpoint"]!,
         tokenCredential: tokenCredential
     );
-    return client;
-});
-
-// Create a single instance of the AzureOpenAIClient to be shared across the application.
-builder.Services.AddSingleton<AzureOpenAIClient>((_) =>
-{
-    var endpoint = new Uri(builder.Configuration["AzureOpenAI:Endpoint"]!);
-    var credentials = new AzureKeyCredential(builder.Configuration["AzureOpenAI:ApiKey"]!);
-
-    var client = new AzureOpenAIClient(endpoint, credentials);
     return client;
 });
 
