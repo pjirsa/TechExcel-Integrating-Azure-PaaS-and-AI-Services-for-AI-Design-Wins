@@ -24,8 +24,11 @@ public class VectorizationService(Kernel kernel, CosmosClient cosmosClient, ICon
         try
         {
             // Generate a vector for the provided text.
-             // Generate a vector for the provided text.
+            #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    // Generate a vector for the provided text.
             var embeddings = await _kernel.GetRequiredService<ITextEmbeddingGenerationService>().GenerateEmbeddingAsync(text);
+            #pragma warning restore SKEXP0001
+
 
             var vector = embeddings.ToArray();
 
